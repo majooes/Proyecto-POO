@@ -2,26 +2,21 @@
 
 ## Capa Modelo (`model`)
 
-### Clase `Mutante`
+### Enum `EstadoMutante`
+- `VIVO`
+- `MUERTO`
+
+### Clase `Posicion`
 **Atributos:**
-- `nombre: String`
-- `energia: int` — inicia en 100
-- `capacidadDefensa: int` — valor entre 1 y 3
-- `poder: PoderMutante` — máximo un poder por mutante
-- `equipo: Equipo`
-- `posicionX: double`, `posicionY: double`
-- `velocidad: double`
-- `vivo: boolean`
+- `x: double`
+- `y: double`
 
 **Métodos:**
-- `mover(): void`
-- `atacar(Mutante objetivo): void`
-- `defenderse(): void`
-- `recibirDano(int dano): void`
-- `estaVivo(): boolean`
-- `getEnergia(): int`
+- `mover(double dx, double dy): void`
+- `getX(): double`
+- `getY(): double`
 
-### Clase `PoderMutante`
+### Clase abstracta `PoderMutante`
 **Atributos:**
 - `nombre: String`
 - `capacidadDano: int` — valor entre 1 y 3
@@ -30,10 +25,52 @@
 **Métodos:**
 - `subirNivel(): void`
 - `getCapacidadDano(): int`
+- `aplicarEfecto(Mutante objetivo): void` — abstracto
+
+**Subclases:** `PoderFuego`, `PoderHielo`, `PoderRayo`, `PoderTelequinesis`, `PoderInvisibilidad`
+
+### Clase `Mutante`
+**Atributos:**
+- `nombre: String`
+- `energia: int` — inicia en 100
+- `capacidadDefensa: int` — valor entre 1 y 3
+- `poder: PoderMutante` — máximo un poder por mutante
+- `posicion: Posicion`
+- `velocidad: double`
+- `estado: EstadoMutante`
+
+**Métodos:**
+- `mover(int ancho, int alto): void`
+- `atacar(Mutante objetivo): void`
+- `defenderse(): void`
+- `synchronized recibirDano(int dano): void`
+- `estaVivo(): boolean`
+- `getEnergia(): int`
 
 ---
 
 ## Capa Juego (`game`)
+
+### Clase `Marcador`
+**Atributos:**
+- `vivos: int`, `muertos: int`, `puntos: int`
+
+**Métodos:**
+- `registrarBaja(): void`
+- `registrarGolpe(int puntos): void`
+- `getVivos(): int`
+- `getMuertos(): int`
+
+### Clase `Equipo`
+**Atributos:**
+- `color: Color`
+- `simbolo: Image`
+- `mutantes: List<Mutante>`
+- `marcador: Marcador`
+
+**Métodos:**
+- `agregarMutante(Mutante m): void`
+- `estaEliminado(): boolean`
 
 ### Clase `CampoBatalla`
 **Atributos:**
@@ -47,33 +84,63 @@
 - `verificarGanador(): Equipo`
 - `getDimensiones(): int[]`
 
-### Clase `Equipo`
+### Clase `MotorJuego`
 **Atributos:**
-- `color: String`
-- `simbolo: String`
-- `mutantes: List<Mutante>`
-- `vivos: int`, `muertos: int`
+- `campoBatalla: CampoBatalla`
+- `gestorHilos: GestorHilos`
+- `refrescoMs: int`
 
 **Métodos:**
-- `actualizarMarcador(): void`
-- `estaEliminado(): boolean`
+- `iniciarPartida(): void`
+- `ejecutarCiclo(): void`
+- `detenerPartida(): void`
 
 ---
 
 ## Capa Control (`control`)
+
+### Enum `AccionCombate`
+- `ATACAR`
+- `DEFENDER`
+
+### Clase `ParCombate`
+**Atributos:**
+- `mutanteA: Mutante`
+- `mutanteB: Mutante`
 
 ### Clase `ControladorMovimiento`
 **Atributos:**
 - `radioDeteccion: double`
 
 **Métodos:**
-- `moverMutante(Mutante m): void`
-- `detectarColision(Mutante m1, Mutante m2): boolean`
+- `moverTodos(List<Mutante> mutantes, int ancho, int alto): void`
+- `generarPatron(Mutante m): void`
+
+### Clase `DetectorColisiones`
+**Atributos:**
+- `radioDeteccion: double`
+
+**Métodos:**
+- `detectarEncuentros(List<Mutante> equipoA, List<Mutante> equipoB): List<ParCombate>`
+
+### Clase `ReglasCombate`
+**Métodos (estáticos):**
+- `decidirAccion(Mutante m): AccionCombate`
+- `calcularDano(Mutante atacante, Mutante defensor, boolean seDefendio): int`
+
+### Clase `GestorHilos`
+**Atributos:**
+- `executor: ExecutorService`
+- `numHilos: int`
+
+**Métodos:**
+- `ejecutarCombates(List<ParCombate> pares): void`
+- `esperarFinalizacion(): void`
+- `apagar(): void`
 
 ### Clase `HiloCombate` (implementa `Runnable`)
 **Atributos:**
-- `mutanteA: Mutante`
-- `mutanteB: Mutante`
+- `par: ParCombate`
 
 **Métodos:**
 - `run(): void`
@@ -102,35 +169,86 @@
 @startuml MutantBattle
 
 package model {
-  class Mutante {
-    - nombre: String
-    - energia: int
-    - capacidadDefensa: int
-    - poder: PoderMutante
-    - posicionX: double
-    - posicionY: double
-    - velocidad: double
-    - vivo: boolean
-    + mover(): void
-    + atacar(objetivo: Mutante): void
-    + defenderse(): void
-    + recibirDano(dano: int): void
-    + estaVivo(): boolean
-    + getEnergia(): int
+
+  enum EstadoMutante {
+    VIVO
+    MUERTO
   }
 
-  class PoderMutante {
+  class Posicion {
+    - x: double
+    - y: double
+    + mover(dx: double, dy: double): void
+    + getX(): double
+    + getY(): double
+  }
+
+  abstract class PoderMutante {
     - nombre: String
     - capacidadDano: int
     - nivel: int
     + subirNivel(): void
     + getCapacidadDano(): int
+    + {abstract} aplicarEfecto(objetivo: Mutante): void
   }
 
+  class PoderFuego extends PoderMutante {
+    + aplicarEfecto(objetivo: Mutante): void
+  }
+  class PoderHielo extends PoderMutante {
+    + aplicarEfecto(objetivo: Mutante): void
+  }
+  class PoderRayo extends PoderMutante {
+    + aplicarEfecto(objetivo: Mutante): void
+  }
+  class PoderTelequinesis extends PoderMutante {
+    + aplicarEfecto(objetivo: Mutante): void
+  }
+  class PoderInvisibilidad extends PoderMutante {
+    + aplicarEfecto(objetivo: Mutante): void
+  }
+
+  class Mutante {
+    - nombre: String
+    - energia: int
+    - capacidadDefensa: int
+    - poder: PoderMutante
+    - posicion: Posicion
+    - velocidad: double
+    - estado: EstadoMutante
+    + mover(ancho: int, alto: int): void
+    + atacar(objetivo: Mutante): void
+    + defenderse(): void
+    + synchronized recibirDano(dano: int): void
+    + estaVivo(): boolean
+    + getEnergia(): int
+  }
+
+  Mutante "1" *-- "1" Posicion
   Mutante "1" *-- "0..1" PoderMutante
 }
 
 package game {
+
+  class Marcador {
+    - vivos: int
+    - muertos: int
+    - puntos: int
+    + registrarBaja(): void
+    + registrarGolpe(puntos: int): void
+    + getVivos(): int
+    + getMuertos(): int
+  }
+
+  class Equipo {
+    - color: Color
+    - simbolo: Image
+    - mutantes: List<Mutante>
+    - marcador: Marcador
+    + agregarMutante(m: Mutante): void
+    + estaEliminado(): boolean
+  }
+
   class CampoBatalla {
     - equipoA: Equipo
     - equipoB: Equipo
@@ -142,37 +260,71 @@ package game {
     + getDimensiones(): int[]
   }
 
-  class Equipo {
-    - color: String
-    - simbolo: String
-    - mutantes: List<Mutante>
-    - vivos: int
-    - muertos: int
-    + actualizarMarcador(): void
-    + estaEliminado(): boolean
+  class MotorJuego {
+    - campoBatalla: CampoBatalla
+    - gestorHilos: GestorHilos
+    - refrescoMs: int
+    + iniciarPartida(): void
+    + ejecutarCiclo(): void
+    + detenerPartida(): void
   }
 
+  Equipo "1" *-- "1" Marcador
+  Equipo "1" o-- "3..11" model.Mutante
   CampoBatalla "1" *-- "2" Equipo
-  Equipo "1" o-- "3..11" Mutante
+  MotorJuego "1" *-- "1" CampoBatalla
 }
 
 package control {
+
+  enum AccionCombate {
+    ATACAR
+    DEFENDER
+  }
+
+  class ParCombate {
+    - mutanteA: model.Mutante
+    - mutanteB: model.Mutante
+  }
+
   class ControladorMovimiento {
     - radioDeteccion: double
-    + moverMutante(m: Mutante): void
-    + detectarColision(m1: Mutante, m2: Mutante): boolean
+    + moverTodos(mutantes: List<model.Mutante>, ancho: int, alto: int): void
+    + generarPatron(m: model.Mutante): void
+  }
+
+  class DetectorColisiones {
+    - radioDeteccion: double
+    + detectarEncuentros(equipoA: List<model.Mutante>, equipoB: List<model.Mutante>): List<ParCombate>
+  }
+
+  class ReglasCombate {
+    + {static} decidirAccion(m: model.Mutante): AccionCombate
+    + {static} calcularDano(atacante: model.Mutante, defensor: model.Mutante, seDefendio: boolean): int
+  }
+
+  class GestorHilos {
+    - executor: ExecutorService
+    - numHilos: int
+    + ejecutarCombates(pares: List<ParCombate>): void
+    + esperarFinalizacion(): void
+    + apagar(): void
   }
 
   class HiloCombate {
-    - mutanteA: Mutante
-    - mutanteB: Mutante
+    - par: ParCombate
     + run(): void
     + resolverCombate(): void
   }
 
   HiloCombate ..|> Runnable
-  ControladorMovimiento ..> Mutante
-  HiloCombate ..> Mutante
+  HiloCombate ..> ReglasCombate
+  HiloCombate "many" <-- GestorHilos
+  DetectorColisiones ..> ParCombate
+  GestorHilos ..> ParCombate
+  MotorJuego ..> ControladorMovimiento
+  MotorJuego ..> DetectorColisiones
+  MotorJuego ..> GestorHilos
 }
 
 package ui {
@@ -183,12 +335,12 @@ package ui {
   class VentanaBatalla {
     + actualizar(): void
     + dibujarMutantes(g: Graphics): void
-    + mostrarGanador(ganador: Equipo): void
+    + mostrarGanador(ganador: game.Equipo): void
     + reiniciarPartida(): void
   }
 
   VentanaBatalla ..|> ObservadorBatalla
-  VentanaBatalla ..> CampoBatalla
+  VentanaBatalla ..> game.MotorJuego
 }
 
 @enduml
