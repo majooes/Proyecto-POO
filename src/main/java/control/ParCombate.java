@@ -3,9 +3,9 @@ package control;
 import model.Mutante;
 
 /**
- * Representa un encuentro entre dos mutantes que quedaron dentro del
- * radio de deteccion. Es el objeto que se le pasa a cada HiloCombate
- * para que resuelva ese encuentro en paralelo con los demas.
+  Representa un encuentro entre dos mutantes que quedaron dentro del
+  radio de deteccion. Es el objeto que se le pasa a cada HiloCombate
+  para que resuelva ese encuentro en paralelo con los demas.
  */
 public class ParCombate {
 
