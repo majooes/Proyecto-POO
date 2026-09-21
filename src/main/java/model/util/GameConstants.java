@@ -32,4 +32,12 @@ public final class GameConstants {
     // Equipo / Batalla (usadas tambien por otras capas) 
     public static final int TAMANO_EQUIPO_MIN = 3;
     public static final int TAMANO_EQUIPO_MAX = 11;
+
+    // Control: movimiento y deteccion
+    public static final double RADIO_DETECCION_DEFECTO = 3.0;
+    public static final double PASO_MOVIMIENTO_MAXIMO = 1.5;
+    public static final double AJUSTE_ANGULO_MAXIMO = Math.PI / 6;
+
+    // Control: hilos de combate
+    public static final int NUM_HILOS_COMBATE_DEFECTO = 4;
 }
