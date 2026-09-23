@@ -35,6 +35,19 @@ public final class GameMain {
             System.out.println("\n--- Ronda " + ronda + " ---");
             motorJuego.ejecutarCiclo();
             System.out.println(campoBatalla.getMarcador());
+
+            System.out.print("  Equipo A -> ");
+            for (model.Mutante m : campoBatalla.getEquipoA().getMutantes()) {
+                System.out.print(m.getNombre() + "=" + m.getEnergia() + " ");
+            }
+            System.out.println();
+
+            System.out.print("  Equipo B -> ");
+            for (model.Mutante m : campoBatalla.getEquipoB().getMutantes()) {
+                System.out.print(m.getNombre() + "=" + m.getEnergia() + " ");
+            }
+            System.out.println();
+
             ganador = campoBatalla.verificarGanador();
             ronda++;
         }
