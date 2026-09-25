@@ -42,14 +42,19 @@ public class Marcador {
         }
     }
 
-    /**
-     * Actualiza el número de mutantes vivos de cada equipo y avanza de ronda.
-     * Se llama constantemente desde la capa Game o Control durante la batalla, 
-     * enviándole cuántos mutantes siguen vivos en cada lado.
+    
+        /**
+     * Sincroniza vivos y muertos de ambos equipos y avanza la ronda.
+     * Se llama periodicamente desde la capa Game / Control mientras la
+     * batalla esta en curso, pasandole los conteos actuales de cada
+     * equipo (por ejemplo, {@code equipoA.getMutantesVivos().size()} y
+     * el numero de mutantes muertos de cada equipo).
      */
-    public void actualizar(int vivosA, int vivosB) {
+    public void actualizar(int vivosA, int vivosB, int muertosA, int muertosB) {
         this.vivosA = vivosA;
         this.vivosB = vivosB;
+        this.muertosA = muertosA;
+        this.muertosB = muertosB;
         rondaActual++;
     }
 

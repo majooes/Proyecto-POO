@@ -72,7 +72,8 @@ public final class ModelMain {
                 + " (energia=" + defensor.getEnergia() + ")");
 
         marcador.registrarMuerte(IdentificadorEquipo.B);
-        marcador.actualizar(marcador.getVivosA(), marcador.getVivosB());
+        marcador.actualizar(marcador.getVivosA(), marcador.getVivosB(),
+        marcador.getMuertosA(), marcador.getMuertosB());
         System.out.println(marcador);
         System.out.println("Ganador parcial segun el marcador: " + marcador.getGanadorParcial());
 
