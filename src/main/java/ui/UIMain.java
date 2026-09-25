@@ -19,9 +19,15 @@ public final class UIMain {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            VentanaBatalla ventanaBatalla = new VentanaBatalla();
-            ventanaBatalla.setVisible(true);
+        // Clase anonima de Runnable en vez de una lambda: crear y
+        // mostrar la ventana debe correr sobre el hilo de eventos de
+        // Swing (Event Dispatch Thread), no sobre el hilo main.
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                VentanaBatalla ventanaBatalla = new VentanaBatalla();
+                ventanaBatalla.setVisible(true);
+            }
         });
     }
 }

@@ -1,5 +1,7 @@
 package ui;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,15 +11,18 @@ import game.CampoBatalla;
 import game.Equipo;
 import game.MotorJuego;
 import ui.util.UIConstants;
-/* 
-* "Sujeto" del patrón Observer encargado de actualizar la vista.
- * <p>
- * - Envuelve a {@link CampoBatalla} y {@link MotorJuego}.
- * - Utiliza un {@code javax.swing.Timer} para notificar periódicamente a los {@link ObservadorBatalla} registrados según {@link UIConstants#REFRESCO_MS_DEFECTO}.
- * - Delega toda la lógica de combate y movimiento al {@link MotorJuego} (que opera en hilos independientes).
- * - Su única responsabilidad es iniciar la simulación y avisar a la interfaz cuándo debe repintarse.
-*/
 
+/**
+ * "Sujeto" del patron Observer encargado de actualizar la vista.
+ * <p>
+ * - Envuelve a CampoBatalla y MotorJuego.
+ * - Utiliza un javax.swing.Timer para notificar periodicamente a los
+ *   ObservadorBatalla registrados segun UIConstants.REFRESCO_MS_DEFECTO.
+ * - Delega toda la logica de combate y movimiento al MotorJuego (que
+ *   opera en hilos independientes).
+ * - Su unica responsabilidad es iniciar la simulacion y avisar a la
+ *   interfaz cuando debe repintarse.
+ */
 public class SujetoBatalla {
 
     private final List<ObservadorBatalla> observadores;
@@ -29,7 +34,17 @@ public class SujetoBatalla {
 
     public SujetoBatalla() {
         this.observadores = new ArrayList<>();
-        this.timerRefresco = new Timer(UIConstants.REFRESCO_MS_DEFECTO, evento -> refrescar());
+
+        // Cada vez que el Timer dispara un tick, llama a refrescar().
+        // Se usa una clase anonima en vez de una lambda para que quede
+        // explicito que ActionListener es una interfaz con un solo
+        // metodo (actionPerformed) que estamos implementando aqui mismo.
+        this.timerRefresco = new Timer(UIConstants.REFRESCO_MS_DEFECTO, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent evento) {
+                refrescar();
+            }
+        });
     }
 
     public void agregarObservador(ObservadorBatalla observador) {
@@ -50,9 +65,10 @@ public class SujetoBatalla {
     }
 
     /**
-    Crea una nueva partida (delegando a {@code CampoBatalla.crearEquipos}) con el tamaño indicado.
-    Inicia el {@link MotorJuego} en un hilo independiente para no bloquear la interfaz gráfica, 
-    mientras un Timer actualiza la vista en paralelo sobre el hilo de Swing.
+     * Crea una nueva partida (delegando a CampoBatalla.crearEquipos) con
+     * el tamano indicado. Inicia el MotorJuego en un hilo independiente
+     * para no bloquear la interfaz grafica, mientras un Timer actualiza
+     * la vista en paralelo sobre el hilo de Swing.
      */
     public void iniciarPartida(int tamanoEquipo) {
         detenerPartida();
@@ -61,7 +77,14 @@ public class SujetoBatalla {
         campoBatalla.crearEquipos(tamanoEquipo);
         motorJuego = new MotorJuego(campoBatalla, UIConstants.REFRESCO_MOTOR_MS);
 
-        hiloPartida = new Thread(motorJuego::iniciarPartida, "hilo-partida-ui");
+        // Clase anonima de Runnable en vez de motorJuego::iniciarPartida,
+        // para que el metodo que se ejecuta en el hilo quede explicito.
+        hiloPartida = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                motorJuego.iniciarPartida();
+            }
+        }, "hilo-partida-ui");
         hiloPartida.setDaemon(true);
         hiloPartida.start();
 
