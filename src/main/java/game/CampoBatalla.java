@@ -75,7 +75,7 @@ public class CampoBatalla {
      * equipo. Se llama despues de cada ronda de combate.
      */
     public void actualizarMarcador() {
-        marcador.actualizar(equipoA.contarVivos(), equipoB.contarVivos());
+        marcador.actualizar(equipoA.contarVivos(), equipoB.contarVivos(), equipoA.contarMuertos(), equipoB.contarMuertos());
     }
 
     /**
