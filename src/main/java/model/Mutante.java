@@ -12,13 +12,13 @@ import model.util.GameConstants;
 public class Mutante {
 
     private final String nombre;
-    private int energia;
+    private volatile int energia;
     private final int capacidadDefensa;
     private PoderMutante poder;
     private IdentificadorEquipo equipo;
     private Posicion posicion;
     private double velocidad;
-    private boolean vivo;
+    private volatile boolean vivo;
 
 /**
 *indica si el mutante decidió defenderse en la pelea actual
@@ -26,7 +26,7 @@ public class Mutante {
 *y el método {@link #atacar(Mutante)} la vuelve a apagar cuando termina.
 */
 
-    private boolean defendiendo;
+    private volatile boolean defendiendo;
 
     public Mutante(String nombre, int capacidadDefensa, Posicion posicion, double velocidad) {
         if (capacidadDefensa < GameConstants.DEFENSA_MIN || capacidadDefensa > GameConstants.DEFENSA_MAX) {
@@ -98,7 +98,7 @@ public class Mutante {
 *reduce la energia del mutante. Si llega a 0 (o menos), el mutante
 *muere y la energia se limita a 0
 */
-    public void recibirDano(int dano) {
+    public synchronized void recibirDano(int dano) {
         if (!estaVivo() || dano <= 0) {
             return;
         }

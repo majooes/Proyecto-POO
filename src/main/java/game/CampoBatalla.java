@@ -12,10 +12,10 @@ import model.Posicion;
 import model.util.GameConstants;
 
 /**
-  Representa el campo de batalla: crea los dos equipos, controla sus
-  dimensiones, y lleva un unico Marcador compartido para ambos equipos
-  (ese diseno de Marcador ya lo trae la capa Model). El juego termina
-  cuando el Marcador indica que un equipo se quedo sin mutantes vivos.
+ * Representa el campo de batalla: crea los dos equipos, controla sus
+ * dimensiones, y lleva un unico Marcador compartido para ambos equipos
+ * (ese diseno de Marcador ya lo trae la capa Model). El juego termina
+ * cuando el Marcador indica que un equipo se quedo sin mutantes vivos.
  */
 public class CampoBatalla {
 
@@ -24,7 +24,7 @@ public class CampoBatalla {
     private final Marcador marcador;
     private Equipo equipoA;
     private Equipo equipoB;
-    private EstadoBatalla estado;
+    private volatile EstadoBatalla estado;
 
     public CampoBatalla(int ancho, int alto) {
         this.ancho = ancho;
@@ -75,7 +75,8 @@ public class CampoBatalla {
      * equipo. Se llama despues de cada ronda de combate.
      */
     public void actualizarMarcador() {
-        marcador.actualizar(equipoA.contarVivos(), equipoB.contarVivos(), equipoA.contarMuertos(), equipoB.contarMuertos());
+        marcador.actualizar(equipoA.contarVivos(), equipoB.contarVivos(),
+                equipoA.contarMuertos(), equipoB.contarMuertos());
     }
 
     /**

@@ -10,11 +10,11 @@ package model;
  */
 public class Marcador {
 
-    private int vivosA;
-    private int vivosB;
-    private int muertosA;
-    private int muertosB;
-    private int rondaActual;
+    private volatile int vivosA;
+    private volatile int vivosB;
+    private volatile int muertosA;
+    private volatile int muertosB;
+    private volatile int rondaActual;
 
     public Marcador() {
         this.vivosA = 0;
@@ -42,13 +42,25 @@ public class Marcador {
         }
     }
 
-    
-        /**
-     * Sincroniza vivos y muertos de ambos equipos y avanza la ronda.
-     * Se llama periodicamente desde la capa Game / Control mientras la
-     * batalla esta en curso, pasandole los conteos actuales de cada
-     * equipo (por ejemplo, {@code equipoA.getMutantesVivos().size()} y
-     * el numero de mutantes muertos de cada equipo).
+    /**
+     * Actualiza el número de mutantes vivos de cada equipo y avanza de ronda.
+     * Se llama constantemente desde la capa Game o Control durante la batalla, 
+     * enviándole cuántos mutantes siguen vivos en cada lado.
+     */
+    /**
+     * Sobrecarga que solo actualiza vivos (deja los muertos como
+     * estaban). La usa ModelMain, que reporta las muertes una por una
+     * con registrarMuerte() en vez de mandar el conteo total.
+     */
+    public void actualizar(int vivosA, int vivosB) {
+        actualizar(vivosA, vivosB, this.muertosA, this.muertosB);
+    }
+
+    /**
+     * Actualiza vivos y muertos de ambos equipos y avanza de ronda. Se
+     * llama en cada ciclo del juego con los conteos reales de Equipo
+     * (Equipo.contarVivos()/contarMuertos()), asi que no depende de que
+     * cada muerte individual se reporte con registrarMuerte().
      */
     public void actualizar(int vivosA, int vivosB, int muertosA, int muertosB) {
         this.vivosA = vivosA;
